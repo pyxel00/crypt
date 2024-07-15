@@ -1,7 +1,10 @@
 # Encoding and decoding text via the command line!
 
 ## Usage
-```crypt [encode/decode] [mode] <input>```
+```
+crypt [encode/decode] [mode] <input>
+```
+only supports base64 (--base64) and base16 (--base16) for now
 
 ## Installation
 ### From source
