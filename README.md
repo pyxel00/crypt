@@ -3,8 +3,11 @@
 ## Usage
 ```
 crypt [encode/decode] [mode] <input>
+
+([mode] = [--base64, --base16, --rot13])
+
 ```
-only supports base64 (--base64) and base16 (--base16) for now
+
 
 ## Installation
 ### From source

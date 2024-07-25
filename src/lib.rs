@@ -1,6 +1,4 @@
-use std::{ascii::AsciiExt, cmp, f32::consts::E, fmt::write, usize};
-
-use clap::builder::Str;
+use std::{cmp, isize, usize};
 
 const HEX_TABLE: [char; 16] = [
     '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F',
@@ -103,9 +101,11 @@ impl Crypt {
     pub fn encode_rot(input: &str) -> String {
         let mut encoded = String::new();
 
-        for mut char in input.chars() {
-            
-            let mut decimal = match E_ALPHABET.iter().position(|c| *c == char.to_ascii_lowercase()) {
+        for char in input.chars() {
+            let mut decimal = match E_ALPHABET
+                .iter()
+                .position(|c| *c == char.to_ascii_lowercase())
+            {
                 Some(d) => d,
                 None => {
                     eprintln!("Couldn' find {char} in the english alphabet");
@@ -124,7 +124,6 @@ impl Crypt {
             } else {
                 encoded.push(E_ALPHABET[decimal]);
             }
-
         }
 
         encoded
@@ -134,24 +133,30 @@ impl Crypt {
         let mut encoded = String::new();
 
         for char in input.chars() {
-            let mut decimal = match E_ALPHABET.iter().position(|c| *c == char.to_ascii_lowercase()) {
-                Some(d) => d,
+            let mut decimal:isize = match E_ALPHABET
+                .iter()
+                .position(|c| *c == char.to_ascii_lowercase())
+            {
+                Some(d) => d as isize,
                 None => {
                     eprintln!("Couldn' find {char} in the english alphabet");
                     continue;
                 }
             };
 
-            decimal -= 13;
+            match decimal - 13 < 0 {
+                true => decimal += 13,
+                false => decimal -= 13
+            }
 
-            if decimal >= E_ALPHABET.len() {
-                decimal = decimal % E_ALPHABET.len();
+            if decimal >= E_ALPHABET.len() as isize {
+                decimal = decimal % E_ALPHABET.len() as isize;
             }
 
             if char.is_uppercase() {
-                encoded.push(E_ALPHABET[decimal].to_ascii_uppercase());
+                encoded.push(E_ALPHABET[decimal as usize].to_ascii_uppercase());
             } else {
-                encoded.push(E_ALPHABET[decimal]);
+                encoded.push(E_ALPHABET[decimal as usize]);
             }
         }
 
