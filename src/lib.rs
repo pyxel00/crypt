@@ -1,4 +1,6 @@
-use std::{cmp, usize};
+use std::{ascii::AsciiExt, cmp, f32::consts::E, fmt::write, usize};
+
+use clap::builder::Str;
 
 const HEX_TABLE: [char; 16] = [
     '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F',
@@ -8,6 +10,11 @@ const BASE64_TABLE: [char; 64] = [
     'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l',
     'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4',
     '5', '6', '7', '8', '9', '+', '/',
+];
+
+const E_ALPHABET: [char; 26] = [
+    'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's',
+    't', 'u', 'v', 'w', 'x', 'y', 'z',
 ];
 
 pub struct Crypt;
@@ -30,7 +37,13 @@ impl Crypt {
         let mut binary = String::new();
 
         for ch in input.chars() {
-            let decimal = HEX_TABLE.iter().position(|c| *c == ch).unwrap();
+            let decimal = match HEX_TABLE.iter().position(|c| *c == ch) {
+                Some(d) => d,
+                None => {
+                    println!("Cannot find the given input in the hex table.");
+                    continue;
+                }
+            };
             binary.push_str(&format!("{:04b}", decimal));
         }
 
@@ -55,7 +68,13 @@ impl Crypt {
                 padding.push('=');
             }
 
-            let decimal = usize::from_str_radix(&binary, 2).unwrap();
+            let decimal = match usize::from_str_radix(&binary, 2) {
+                Ok(d) => d,
+                Err(why) => {
+                    println!("Couldn't parse binary to decimal : {why}, Input binary : {binary}");
+                    continue;
+                }
+            };
             encoded.push(BASE64_TABLE[decimal]);
         }
 
@@ -79,6 +98,64 @@ impl Crypt {
         }
 
         decoded
+    }
+
+    pub fn encode_rot(input: &str) -> String {
+        let mut encoded = String::new();
+
+        for mut char in input.chars() {
+            
+            let mut decimal = match E_ALPHABET.iter().position(|c| *c == char.to_ascii_lowercase()) {
+                Some(d) => d,
+                None => {
+                    eprintln!("Couldn' find {char} in the english alphabet");
+                    continue;
+                }
+            };
+
+            decimal += 13;
+
+            if decimal >= E_ALPHABET.len() {
+                decimal = decimal % E_ALPHABET.len();
+            }
+
+            if char.is_uppercase() {
+                encoded.push(E_ALPHABET[decimal].to_ascii_uppercase());
+            } else {
+                encoded.push(E_ALPHABET[decimal]);
+            }
+
+        }
+
+        encoded
+    }
+
+    pub fn decode_rot(input: &str) -> String {
+        let mut encoded = String::new();
+
+        for char in input.chars() {
+            let mut decimal = match E_ALPHABET.iter().position(|c| *c == char.to_ascii_lowercase()) {
+                Some(d) => d,
+                None => {
+                    eprintln!("Couldn' find {char} in the english alphabet");
+                    continue;
+                }
+            };
+
+            decimal -= 13;
+
+            if decimal >= E_ALPHABET.len() {
+                decimal = decimal % E_ALPHABET.len();
+            }
+
+            if char.is_uppercase() {
+                encoded.push(E_ALPHABET[decimal].to_ascii_uppercase());
+            } else {
+                encoded.push(E_ALPHABET[decimal]);
+            }
+        }
+
+        encoded
     }
 
     fn str_to_binary(input: &String) -> String {
