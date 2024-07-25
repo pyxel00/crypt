@@ -4,8 +4,7 @@
 ```
 crypt [encode/decode] [mode] <input>
 
-([mode] = [--base64, --base16, --rot13])
-
+[mode] = [--base64, --base16, --rot13]
 ```
 
 
