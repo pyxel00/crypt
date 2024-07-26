@@ -22,9 +22,12 @@ impl Crypt {
         let mut encoded = String::new();
 
         let vec = Self::split(&Self::str_to_binary(input), 4);
+
         for binary in vec {
-            let decimal = usize::from_str_radix(&binary, 2).unwrap();
-            encoded.push(HEX_TABLE[decimal]);
+            match usize::from_str_radix(&binary, 2) {
+                Ok(decimal) => encoded.push(HEX_TABLE[decimal]),
+                Err(why) => eprintln!("Couldn't parse {binary} to usize : {why}"),
+            }
         }
 
         encoded
@@ -66,14 +69,10 @@ impl Crypt {
                 padding.push('=');
             }
 
-            let decimal = match usize::from_str_radix(&binary, 2) {
-                Ok(d) => d,
-                Err(why) => {
-                    println!("Couldn't parse binary to decimal : {why}, Input binary : {binary}");
-                    continue;
-                }
+            match usize::from_str_radix(&binary, 2) {
+                Ok(decimal) => encoded.push(BASE64_TABLE[decimal]),
+                Err(why) => eprintln!("Couldn't parse {binary} to usize : {why}"),
             };
-            encoded.push(BASE64_TABLE[decimal]);
         }
 
         encoded + &padding
@@ -84,15 +83,19 @@ impl Crypt {
         let mut binary = String::new();
 
         for ch in un_padded.chars() {
-            let decimal = BASE64_TABLE.iter().position(|c| *c == ch).unwrap();
-            binary.push_str(&format!("{:06b}", decimal));
+            match BASE64_TABLE.iter().position(|c| *c == ch) {
+                Some(pos) => binary.push_str(&format!("{:06b}", pos)),
+                None => eprintln!("Couldn't find {ch} in base64 table."),
+            };
         }
 
         let vec = Self::split(&binary, 8);
 
         for item in vec {
-            let decimal = u8::from_str_radix(&item, 2).unwrap();
-            decoded.push(decimal as char);
+            match u8::from_str_radix(&item, 2) {
+                Ok(decimal) => decoded.push(decimal as char),
+                Err(why) => eprintln!("Couldn't parse {binary} to usize : {why}"),
+            }
         }
 
         decoded
@@ -133,7 +136,7 @@ impl Crypt {
         let mut encoded = String::new();
 
         for char in input.chars() {
-            let mut decimal:isize = match E_ALPHABET
+            let mut decimal: isize = match E_ALPHABET
                 .iter()
                 .position(|c| *c == char.to_ascii_lowercase())
             {
@@ -146,7 +149,7 @@ impl Crypt {
 
             match decimal - 13 < 0 {
                 true => decimal += 13,
-                false => decimal -= 13
+                false => decimal -= 13,
             }
 
             if decimal >= E_ALPHABET.len() as isize {
