@@ -1,7 +1,7 @@
 use std::{cmp, isize, usize};
 
 const HEX_TABLE: [char; 16] = [
-    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F',
+    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f',
 ];
 const BASE64_TABLE: [char; 64] = [
     'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S',
@@ -18,7 +18,7 @@ const E_ALPHABET: [char; 26] = [
 pub struct Crypt;
 
 impl Crypt {
-    pub fn encode_16(input: &String) -> String {
+    pub fn encode_16(input: &str) -> String {
         let mut encoded = String::new();
 
         let vec = Self::split(&Self::str_to_binary(input), 4);
@@ -33,7 +33,7 @@ impl Crypt {
         encoded
     }
 
-    pub fn decode_16(input: &String) -> String {
+    pub fn decode_16(input: &str) -> String {
         let mut decoded = String::new();
         let mut binary = String::new();
 
@@ -58,7 +58,7 @@ impl Crypt {
         decoded
     }
 
-    pub fn encode_64(input: &String) -> String {
+    pub fn encode_64(input: &str) -> String {
         let mut encoded = String::new();
         let mut padding = String::new();
 
@@ -77,7 +77,7 @@ impl Crypt {
 
         encoded + &padding
     }
-    pub fn decode_64(input: &String) -> String {
+    pub fn decode_64(input: &str) -> String {
         let un_padded: String = input.chars().filter(|c| *c != '=').collect();
         let mut decoded = String::new();
         let mut binary = String::new();
@@ -105,6 +105,11 @@ impl Crypt {
         let mut encoded = String::new();
 
         for char in input.chars() {
+            if char as u8 == 32 {
+                encoded.push(' ');
+                continue;
+            }
+
             let mut decimal = match E_ALPHABET
                 .iter()
                 .position(|c| *c == char.to_ascii_lowercase())
@@ -112,6 +117,7 @@ impl Crypt {
                 Some(d) => d,
                 None => {
                     eprintln!("Couldn' find {char} in the english alphabet");
+                    encoded.push(char);
                     continue;
                 }
             };
@@ -136,6 +142,11 @@ impl Crypt {
         let mut encoded = String::new();
 
         for char in input.chars() {
+            if char as u8 == 32 {
+                encoded.push(' ');
+                continue;
+            }
+
             let mut decimal: isize = match E_ALPHABET
                 .iter()
                 .position(|c| *c == char.to_ascii_lowercase())
@@ -143,6 +154,7 @@ impl Crypt {
                 Some(d) => d as isize,
                 None => {
                     eprintln!("Couldn' find {char} in the english alphabet");
+                    encoded.push(char);
                     continue;
                 }
             };
@@ -166,7 +178,7 @@ impl Crypt {
         encoded
     }
 
-    fn str_to_binary(input: &String) -> String {
+    fn str_to_binary(input: &str) -> String {
         let mut binary = String::new();
 
         for char in input.chars() {
@@ -176,7 +188,7 @@ impl Crypt {
         binary
     }
 
-    fn split(input: &String, at: usize) -> Vec<String> {
+    fn split(input: &str, at: usize) -> Vec<String> {
         let mut last = Vec::new();
         let mut i: usize = 0;
 
